@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+        <h2>Benutzerverwaltung</h2>
+        <p class="text-muted">Nur Administratoren können Rollen vergeben. Diese Seite ist für READONLY- und SACHBEARBEITER-Konten gesperrt.</p>
+
+        <p:messages showDetail="true"/>
+
+        <!-- Benutzertabelle -->
+        <h:form id="userTableForm">
+            <p:dataTable id="userTable"
+                         value="#{userAdminController.users}"
+                         var="user"
+                         emptyMessage="Keine Benutzer gefunden."
+                         rowHover="true"
+                         styleClass="mt-md">
+
+                <p:column headerText="Benutzername" sortBy="#{user.username}">
+                    <h:outputText value="#{user.username}"/>
+                </p:column>
+
+                <p:column headerText="Vorname Nachname">
+                    <h:outputText value="#{user.firstName} #{user.lastName}"/>
+                </p:column>
+
+                <p:column headerText="E-Mail">
+                    <h:outputText value="#{user.email}"/>
+                </p:column>
+
+                <p:column headerText="Rolle" style="width: 180px;">
+                    <!-- Inline-Dropdown: Rolle direkt in der Tabelle ändern -->
+                    <p:selectOneMenu value="#{user.role}"
+                                     style="width: 100%;">
+                        <f:selectItem itemLabel="ADMIN"          itemValue="ADMIN"/>
+                        <f:selectItem itemLabel="SACHBEARBEITER" itemValue="SACHBEARBEITER"/>
+                        <f:selectItem itemLabel="READONLY"       itemValue="READONLY"/>
+                    </p:selectOneMenu>
+                </p:column>
+
+                <p:column headerText="Speichern" style="width: 100px;">
+                    <p:commandButton value="Speichern"
+                                     icon="pi pi-save"
+                                     action="#{userAdminController.updateRole(user)}"
+                                     update="userTable"
+                                     styleClass="btn-secondary"/>
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

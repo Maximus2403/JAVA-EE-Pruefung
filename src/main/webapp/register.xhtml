@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+        <h2>Registrierung</h2>
+        <p class="text-muted">Neue Konten erhalten zunächst den Lesezugriff. Ein Administrator kann die Rolle nachträglich anpassen.</p>
+
+        <h:form id="registrationForm">
+            <p:messages showDetail="true"/>
+
+            <p:panelGrid columns="2" styleClass="form-grid">
+
+                <p:outputLabel for="username" value="Benutzername"/>
+                <p:inputText id="username"
+                             value="#{registrationController.username}"
+                             required="true"
+                             requiredMessage="Bitte einen Benutzernamen eingeben."
+                             placeholder="Benutzername"/>
+
+                <p:outputLabel for="email" value="E-Mail"/>
+                <p:inputText id="email"
+                             value="#{registrationController.email}"
+                             required="true"
+                             requiredMessage="Bitte eine E-Mail-Adresse eingeben."
+                             placeholder="name@firma.de"/>
+
+                <p:outputLabel for="firstName" value="Vorname"/>
+                <p:inputText id="firstName"
+                             value="#{registrationController.firstName}"
+                             required="true"
+                             requiredMessage="Bitte den Vornamen eingeben."/>
+
+                <p:outputLabel for="lastName" value="Nachname"/>
+                <p:inputText id="lastName"
+                             value="#{registrationController.lastName}"
+                             required="true"
+                             requiredMessage="Bitte den Nachnamen eingeben."/>
+
+                <p:outputLabel for="password" value="Passwort"/>
+                <p:password id="password"
+                            value="#{registrationController.password}"
+                            required="true"
+                            requiredMessage="Bitte ein Passwort eingeben."
+                            feedback="true"
+                            promptLabel="Bitte Passwort eingeben"
+                            weakLabel="Schwach"
+                            goodLabel="Gut"
+                            strongLabel="Stark"/>
+
+                <p:outputLabel for="confirmPassword" value="Passwort bestätigen"/>
+                <p:password id="confirmPassword"
+                            value="#{registrationController.confirmPassword}"
+                            required="true"
+                            requiredMessage="Bitte das Passwort wiederholen."
+                            feedback="false"/>
+
+            </p:panelGrid>
+
+            <p:commandButton value="Registrieren"
+                             action="#{registrationController.submitRegistration}"
+                             styleClass="mt-md"
+                             ajax="false"/>
+        </h:form>
+
+        <p class="mt-md">
+            Bereits registriert? <h:link value="Zum Login" outcome="/login.xhtml"/>
+        </p>
+    </ui:define>
+</ui:composition>
+</html>

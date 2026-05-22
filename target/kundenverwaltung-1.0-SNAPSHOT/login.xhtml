@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+        <h2>Anmelden</h2>
+
+        <h:form id="loginForm">
+            <p:messages showDetail="true"/>
+
+            <p:panelGrid columns="2" styleClass="form-grid">
+
+                <p:outputLabel for="username" value="Benutzername"/>
+                <p:inputText id="username"
+                             value="#{loginController.username}"
+                             required="true"
+                             requiredMessage="Bitte den Benutzernamen eingeben."
+                             placeholder="Benutzername"/>
+
+                <p:outputLabel for="password" value="Passwort"/>
+                <p:password id="password"
+                            value="#{loginController.password}"
+                            required="true"
+                            requiredMessage="Bitte das Passwort eingeben."
+                            feedback="false"/>
+
+            </p:panelGrid>
+
+            <p:commandButton value="Anmelden"
+                             action="#{loginController.submitLogin}"
+                             styleClass="mt-md"
+                            ajax="false"/>
+        </h:form>
+
+        <p class="mt-md">
+            Noch kein Konto? <h:link value="Jetzt registrieren" outcome="/register.xhtml"/>
+        </p>
+    </ui:define>
+</ui:composition>
+</html>

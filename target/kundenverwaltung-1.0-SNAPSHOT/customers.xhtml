@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+        <h2>Kundenliste</h2>
+
+        <!-- MUST M-2: Suchleiste -->
+        <h:form id="searchForm">
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:inputText id="searchInput"
+                                 value="#{customerController.searchTerm}"
+                                 placeholder="Name, Kundennr. oder Unternehmen suchen …"
+                                 style="width: 300px;"/>
+                    <p:commandButton value="Suchen"
+                                     icon="pi pi-search"
+                                     action="#{customerController.search}"
+                                     update=":tableForm"
+                                     styleClass="ml-sm"/>
+                    <p:commandButton value="Zurücksetzen"
+                                     icon="pi pi-times"
+                                     action="#{customerController.resetSearch}"
+                                     update=":tableForm :searchForm"
+                                     styleClass="btn-secondary ml-sm"/>
+                </p:toolbarGroup>
+
+                <!-- COULD C-1: CSV-Export -->
+                <p:toolbarGroup align="right">
+                    <p:commandButton value="CSV exportieren"
+                                     icon="pi pi-download"
+                                     action="#{csvExportController.exportCsv}"
+                                     rendered="#{authController.canEdit}"
+                                     ajax="false"
+                                     styleClass="btn-secondary"/>
+                </p:toolbarGroup>
+            </p:toolbar>
+        </h:form>
+
+        <!-- MUST M-1 + M-2: Kundentabelle -->
+        <h:form id="tableForm">
+            <p:dataTable id="customerTable"
+                         value="#{customerController.customers}"
+                         var="customer"
+                         emptyMessage="Keine Kunden gefunden."
+                         rowHover="true"
+                         paginator="true"
+                         rows="10"
+                         styleClass="mt-md">
+
+                <p:column headerText="Kundennr." sortBy="#{customer.customerNumber}">
+                    <h:outputText value="#{customer.customerNumber}"/>
+                </p:column>
+
+                <p:column headerText="Name" sortBy="#{customer.lastName}">
+                    <h:outputText value="#{customer.fullName}"/>
+                </p:column>
+
+                <p:column headerText="E-Mail">
+                    <h:outputText value="#{customer.email}"/>
+                </p:column>
+
+                <p:column headerText="Telefon">
+                    <h:outputText value="#{customer.phone}"/>
+                </p:column>
+
+                <p:column headerText="Unternehmen">
+                    <h:outputText value="#{customer.company}"/>
+                </p:column>
+
+                <p:column headerText="Angelegt am">
+                    <h:outputText value="#{customer.createdAt}">
+                        <f:convertDateTime pattern="dd.MM.yyyy" type="localDate"/>
+                    </h:outputText>
+                </p:column>
+
+                <!-- Projekte-Button (COULD C-2) -->
+                <p:column headerText="Projekte" style="width: 110px">
+                    <p:commandButton value="#{projectController.isSelected(customer.id) ? 'Schließen' : 'Projekte'}"
+                                     icon="pi pi-sitemap"
+                                     styleClass="btn-secondary"
+                                     action="#{projectController.toggleCustomer(customer.id)}"
+                                     update=":tableForm :projectPanel"/>
+                </p:column>
+
+                <!-- Aktionen -->
+                <p:column headerText="Aktionen"
+                          style="width: 120px"
+                          rendered="#{authController.canEdit}">
+                    <p:commandButton icon="pi pi-pencil"
+                                     title="Bearbeiten"
+                                     styleClass="btn-secondary"
+                                     action="#{customerController.setSelectedCustomer(customer)}"
+                                     update=":editForm"
+                                     oncomplete="PF('editDialog').show()"/>
+                    <p:commandButton icon="pi pi-trash"
+                                     title="Löschen"
+                                     styleClass="ml-sm"
+                                     action="#{customerController.deleteCustomer(customer)}"
+                                     update=":tableForm"
+                                     onclick="return confirm('Kunden #{customer.fullName} wirklich löschen?')"/>
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
+
+        <!-- COULD C-2: Projektbereich (klappt auf wenn Kunde ausgewählt) -->
+        <h:panelGroup id="projectPanel">
+            <h:panelGroup rendered="#{projectController.selectedCustomer != null}">
+                <div class="divider"/>
+                <h2>Projekte von #{projectController.selectedCustomer.fullName}</h2>
+
+                <p:messages showDetail="true"/>
+
+                <!-- Projektliste -->
+                <h:form id="projectListForm">
+                    <h:panelGroup rendered="#{not empty projectController.rootProjects}">
+                        <p:dataTable value="#{projectController.rootProjects}"
+                                     var="root"
+                                     rowHover="true"
+                                     styleClass="mt-md">
+
+                            <p:column headerText="Projektname">
+                                <strong><h:outputText value="#{root.name}"/></strong>
+                                <h:outputText value=" — #{root.description}"
+                                              rendered="#{not empty root.description}"
+                                              styleClass="text-muted"/>
+                                <ui:repeat value="#{root.subProjects}" var="sub">
+                                    <div style="margin-left:1.5rem;padding-left:0.75rem;
+                                                border-left:3px solid #17C3B2;margin-top:0.3rem;">
+                                        <h:outputText value="#{sub.name}"/>
+                                        <h:outputText value=" — #{sub.description}"
+                                                      rendered="#{not empty sub.description}"
+                                                      styleClass="text-muted"/>
+                                    </div>
+                                </ui:repeat>
+                            </p:column>
+
+                            <p:column headerText="Status" style="width:130px">
+                                <h:outputText value="#{root.status}"/>
+                            </p:column>
+
+                            <p:column headerText="Löschen" style="width:80px"
+                                      rendered="#{authController.canEdit}">
+                                <p:commandButton icon="pi pi-trash"
+                                                 title="Löschen"
+                                                 action="#{projectController.deleteProject(root)}"
+                                                 update=":projectPanel"
+                                                 onclick="return confirm('Projekt löschen?')"/>
+                            </p:column>
+
+                        </p:dataTable>
+                    </h:panelGroup>
+                    <h:outputText value="Noch keine Projekte vorhanden."
+                                  rendered="#{empty projectController.rootProjects}"
+                                  styleClass="text-muted"/>
+                </h:form>
+
+                <!-- Neues Projekt anlegen -->
+                <h:panelGroup rendered="#{authController.canEdit}">
+                    <h3>Neues Projekt anlegen</h3>
+                    <h:form id="projectForm">
+                        <h:panelGrid columns="2" styleClass="form-grid">
+
+                            <h:outputLabel for="newName" value="Projektname *"/>
+                            <h:panelGroup>
+                                <h:inputText id="newName"
+                                             value="#{projectController.newName}"
+                                             required="true"
+                                             requiredMessage="Projektname ist Pflicht."
+                                             maxlength="128"/>
+                                <h:message for="newName" styleClass="field-error"/>
+                            </h:panelGroup>
+
+                            <h:outputLabel for="newDescription" value="Beschreibung"/>
+                            <h:inputTextarea id="newDescription"
+                                             value="#{projectController.newDescription}"
+                                             rows="2" style="width:100%"/>
+
+                            <h:outputLabel for="newStatus" value="Status *"/>
+                            <h:selectOneMenu id="newStatus"
+                                             value="#{projectController.newStatus}">
+                                <f:selectItems value="#{projectController.availableStatuses}"/>
+                            </h:selectOneMenu>
+
+                            <h:outputLabel for="newParentId" value="Oberprojekt"/>
+                            <h:selectOneMenu id="newParentId"
+                                             value="#{projectController.newParentId}">
+                                <f:selectItem itemLabel="— keines (Wurzelprojekt) —"
+                                              itemValue="#{null}"
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{projectController.allProjects}"
+                                               var="p"
+                                               itemLabel="#{p.name}"
+                                               itemValue="#{p.id}"/>
+                            </h:selectOneMenu>
+
+                        </h:panelGrid>
+                        <br/>
+                        <h:commandButton value="Projekt speichern"
+                                         action="#{projectController.saveProject}"
+                                         update=":projectPanel"/>
+                    </h:form>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <!-- MUST M-1: Neuen Kunden anlegen -->
+        <h:panelGroup rendered="#{authController.canEdit}">
+            <div class="divider"/>
+            <h2>Neuen Kunden anlegen</h2>
+            <h:form id="createForm">
+                <p:messages showDetail="true"/>
+                <p:panelGrid columns="2" styleClass="form-grid">
+
+                    <p:outputLabel for="customerNumber" value="Kundennummer *"/>
+                    <p:inputText id="customerNumber"
+                                 value="#{customerController.newCustomer.customerNumber}"
+                                 required="true"
+                                 requiredMessage="Kundennummer ist Pflicht."
+                                 placeholder="z.B. KD-0006"/>
+
+                    <p:outputLabel for="firstName" value="Vorname *"/>
+                    <p:inputText id="firstName"
+                                 value="#{customerController.newCustomer.firstName}"
+                                 required="true"
+                                 requiredMessage="Vorname ist Pflicht."/>
+
+                    <p:outputLabel for="lastName" value="Nachname *"/>
+                    <p:inputText id="lastName"
+                                 value="#{customerController.newCustomer.lastName}"
+                                 required="true"
+                                 requiredMessage="Nachname ist Pflicht."/>
+
+                    <p:outputLabel for="email" value="E-Mail *"/>
+                    <p:inputText id="email"
+                                 value="#{customerController.newCustomer.email}"
+                                 required="true"
+                                 requiredMessage="E-Mail ist Pflicht."/>
+
+                    <p:outputLabel for="phone" value="Telefon"/>
+                    <p:inputText id="phone"
+                                 value="#{customerController.newCustomer.phone}"/>
+
+                    <p:outputLabel for="company" value="Unternehmen"/>
+                    <p:inputText id="company"
+                                 value="#{customerController.newCustomer.company}"/>
+
+                </p:panelGrid>
+
+                <p:commandButton value="Kunden speichern"
+                                 icon="pi pi-save"
+                                 action="#{customerController.saveCustomer}"
+                                 update=":tableForm :createForm"
+                                 styleClass="mt-md"/>
+            </h:form>
+        </h:panelGroup>
+
+        <!-- Bearbeiten-Dialog -->
+        <p:dialog header="Kunde bearbeiten"
+                  widgetVar="editDialog"
+                  modal="true"
+                  width="500"
+                  rendered="#{authController.canEdit}">
+            <h:form id="editForm">
+                <p:messages showDetail="true"/>
+                <p:panelGrid columns="2" styleClass="form-grid">
+
+                    <p:outputLabel for="editCustomerNumber" value="Kundennummer *"/>
+                    <p:inputText id="editCustomerNumber"
+                                 value="#{customerController.selectedCustomer.customerNumber}"
+                                 required="true"/>
+
+                    <p:outputLabel for="editFirstName" value="Vorname *"/>
+                    <p:inputText id="editFirstName"
+                                 value="#{customerController.selectedCustomer.firstName}"
+                                 required="true"/>
+
+                    <p:outputLabel for="editLastName" value="Nachname *"/>
+                    <p:inputText id="editLastName"
+                                 value="#{customerController.selectedCustomer.lastName}"
+                                 required="true"/>
+
+                    <p:outputLabel for="editEmail" value="E-Mail *"/>
+                    <p:inputText id="editEmail"
+                                 value="#{customerController.selectedCustomer.email}"
+                                 required="true"/>
+
+                    <p:outputLabel for="editPhone" value="Telefon"/>
+                    <p:inputText id="editPhone"
+                                 value="#{customerController.selectedCustomer.phone}"/>
+
+                    <p:outputLabel for="editCompany" value="Unternehmen"/>
+                    <p:inputText id="editCompany"
+                                 value="#{customerController.selectedCustomer.company}"/>
+
+                </p:panelGrid>
+
+                <p:commandButton value="Speichern"
+                                 icon="pi pi-save"
+                                 action="#{customerController.updateCustomer}"
+                                 update=":tableForm :editForm"
+                                 oncomplete="if (!args.validationFailed) PF('editDialog').hide()"/>
+                <p:commandButton value="Abbrechen"
+                                 icon="pi pi-times"
+                                 onclick="PF('editDialog').hide(); return false;"
+                                 styleClass="btn-secondary ml-sm"/>
+            </h:form>
+        </p:dialog>
+
+    </ui:define>
+</ui:composition>
+</html>

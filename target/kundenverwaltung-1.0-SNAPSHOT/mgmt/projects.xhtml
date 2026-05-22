@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+
+<f:metadata>
+    <f:viewAction action="#{projectController.init}"/>
+</f:metadata>
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+
+        <h:link value="← Zurück zur Kundenliste" outcome="/customers.xhtml"
+                styleClass="text-muted"/>
+
+        <h2>
+            Projekte von:
+            <h:outputText value="#{projectController.customer.fullName}"
+                          rendered="#{projectController.customer != null}"/>
+            <h:outputText value=" (#{projectController.customer.company})"
+                          rendered="#{projectController.customer != null
+                                      and not empty projectController.customer.company}"/>
+        </h2>
+
+        <p:messages id="msgs" showDetail="true"/>
+
+        <!-- Projektliste -->
+        <h:panelGroup rendered="#{not empty projectController.rootProjects}">
+            <p:dataTable id="projectTable"
+                         value="#{projectController.rootProjects}"
+                         var="root"
+                         rowHover="true"
+                         styleClass="mt-md">
+
+                <p:column headerText="Projektname">
+                    <strong><h:outputText value="#{root.name}"/></strong>
+                    <h:outputText value=" — #{root.description}"
+                                  rendered="#{not empty root.description}"
+                                  styleClass="text-muted"/>
+                    <ui:repeat value="#{root.subProjects}" var="sub">
+                        <div style="margin-left:1.5rem;padding-left:0.75rem;
+                                    border-left:3px solid #17C3B2;margin-top:0.3rem;">
+                            <h:outputText value="#{sub.name}"/>
+                            <h:outputText value=" — #{sub.description}"
+                                          rendered="#{not empty sub.description}"
+                                          styleClass="text-muted"/>
+                        </div>
+                    </ui:repeat>
+                </p:column>
+
+                <p:column headerText="Status" style="width:140px">
+                    <h:outputText value="#{root.status}"/>
+                </p:column>
+
+                <p:column headerText="Aktionen" style="width:140px"
+                          rendered="#{authController.canEdit}">
+                    <h:form>
+                        <h:inputHidden value="#{projectController.customerId}"/>
+                        <h:commandButton value="🗑"
+                                         title="Löschen"
+                                         action="#{projectController.deleteProject(root)}"
+                                         onclick="return confirm('Projekt löschen?')"
+                                         styleClass="btn-secondary"/>
+                    </h:form>
+                </p:column>
+
+            </p:dataTable>
+        </h:panelGroup>
+
+        <h:outputText value="Noch keine Projekte vorhanden."
+                      rendered="#{empty projectController.rootProjects}"
+                      styleClass="text-muted"/>
+
+        <!-- Neues Projekt anlegen (analog zu event-session.xhtml) -->
+        <h:panelGroup rendered="#{authController.canEdit}">
+            <div class="divider"/>
+            <h2>Neues Projekt anlegen</h2>
+
+            <h:form id="createProjectForm">
+                <h:inputHidden id="hiddenCid" value="#{projectController.customerIdParam}"/>
+                <h:panelGrid columns="2" styleClass="form-grid">
+
+                    <h:outputLabel for="newName" value="Projektname *"/>
+                    <h:panelGroup>
+                        <h:inputText id="newName"
+                                     value="#{projectController.newName}"
+                                     required="true"
+                                     requiredMessage="Bitte einen Projektnamen eingeben."
+                                     maxlength="128"/>
+                        <h:message for="newName" styleClass="field-error"/>
+                    </h:panelGroup>
+
+                    <h:outputLabel for="newDescription" value="Beschreibung"/>
+                    <h:inputTextarea id="newDescription"
+                                     value="#{projectController.newDescription}"
+                                     rows="3"
+                                     style="width:100%"/>
+
+                    <h:outputLabel for="newStatus" value="Status *"/>
+                    <h:selectOneMenu id="newStatus"
+                                     value="#{projectController.newStatus}"
+                                     required="true">
+                        <f:selectItems value="#{projectController.availableStatuses}"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="newParentId" value="Oberprojekt"/>
+                    <h:selectOneMenu id="newParentId"
+                                     value="#{projectController.newParentId}">
+                        <f:selectItem itemLabel="— keines (Wurzelprojekt) —"
+                                      itemValue="#{null}"
+                                      noSelectionOption="true"/>
+                        <f:selectItems value="#{projectController.allProjects}"
+                                       var="p"
+                                       itemLabel="#{p.name}"
+                                       itemValue="#{p.id}"/>
+                    </h:selectOneMenu>
+
+                </h:panelGrid>
+
+                <br/>
+                <h:commandButton id="saveProject"
+                                 value="Projekt speichern"
+                                 action="#{projectController.saveProject}"/>
+            </h:form>
+        </h:panelGroup>
+
+    </ui:define>
+</ui:composition>
+</html>
