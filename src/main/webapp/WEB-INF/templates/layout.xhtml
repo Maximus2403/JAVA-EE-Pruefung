@@ -10,7 +10,6 @@
 </h:head>
 
 <h:body>
-    <!-- Globale Meldungen (Erfolg, Fehler, Warnungen) -->
     <p:messages id="messages" showDetail="true" closable="true"/>
 
     <header>
@@ -21,11 +20,6 @@
             <h:panelGroup rendered="#{authController.loggedIn}">
                 |
                 <h:link value="Kundenliste" outcome="/customers.xhtml"/>
-
-                <h:panelGroup rendered="#{authController.canEdit}">
-                    |
-                    <h:link value="Projekte" outcome="/mgmt/projects.xhtml"/>
-                </h:panelGroup>
 
                 <h:panelGroup rendered="#{authController.admin}">
                     |
@@ -43,7 +37,7 @@
 
             <h:panelGroup rendered="#{not authController.loggedIn}">
                 |
-                <h:link value="Login"       outcome="/login.xhtml"/>
+                <h:link value="Login"        outcome="/login.xhtml"/>
                 |
                 <h:link value="Registrieren" outcome="/register.xhtml"/>
             </h:panelGroup>

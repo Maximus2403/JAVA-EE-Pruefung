@@ -119,37 +119,31 @@
 
                 <!-- Projektliste -->
                 <h:form id="projectListForm">
-                    <h:panelGroup rendered="#{not empty projectController.rootProjects}">
-                        <p:dataTable value="#{projectController.rootProjects}"
-                                     var="root"
+                    <h:panelGroup rendered="#{not empty projectController.flatTree}">
+                        <p:dataTable value="#{projectController.flatTree}"
+                                     var="node"
                                      rowHover="true"
                                      styleClass="mt-md">
 
                             <p:column headerText="Projektname">
-                                <strong><h:outputText value="#{root.name}"/></strong>
-                                <h:outputText value=" — #{root.description}"
-                                              rendered="#{not empty root.description}"
-                                              styleClass="text-muted"/>
-                                <ui:repeat value="#{root.subProjects}" var="sub">
-                                    <div style="margin-left:1.5rem;padding-left:0.75rem;
-                                                border-left:3px solid #17C3B2;margin-top:0.3rem;">
-                                        <h:outputText value="#{sub.name}"/>
-                                        <h:outputText value=" — #{sub.description}"
-                                                      rendered="#{not empty sub.description}"
-                                                      styleClass="text-muted"/>
-                                    </div>
-                                </ui:repeat>
+                                <div style="#{node.indentStyle}">
+                                    <h:outputText value="#{node.project.name}"
+                                                  style="#{node.root ? 'font-weight:bold' : ''}"/>
+                                    <h:outputText value=" — #{node.project.description}"
+                                                  rendered="#{not empty node.project.description}"
+                                                  styleClass="text-muted"/>
+                                </div>
                             </p:column>
 
                             <p:column headerText="Status" style="width:130px">
-                                <h:outputText value="#{root.status}"/>
+                                <h:outputText value="#{node.project.status}"/>
                             </p:column>
 
                             <p:column headerText="Löschen" style="width:80px"
                                       rendered="#{authController.canEdit}">
                                 <p:commandButton icon="pi pi-trash"
                                                  title="Löschen"
-                                                 action="#{projectController.deleteProject(root)}"
+                                                 action="#{projectController.deleteProject(node.project)}"
                                                  update=":projectPanel"
                                                  onclick="return confirm('Projekt löschen?')"/>
                             </p:column>
@@ -157,7 +151,7 @@
                         </p:dataTable>
                     </h:panelGroup>
                     <h:outputText value="Noch keine Projekte vorhanden."
-                                  rendered="#{empty projectController.rootProjects}"
+                                  rendered="#{empty projectController.flatTree}"
                                   styleClass="text-muted"/>
                 </h:form>
 

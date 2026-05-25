@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static jakarta.persistence.Persistence.createEntityManagerFactory;
@@ -27,14 +28,20 @@ public class ProjectRepository {
     public List<Project> findRootsByCustomer(Long customerId) {
         EntityManager em = getEntityManager();
         try {
-            return em.createQuery(
+            // Erst alle Projekte des Kunden mit subProjects laden
+            List<Project> all = em.createQuery(
                     "SELECT DISTINCT p FROM Project p " +
                     "LEFT JOIN FETCH p.subProjects " +
-                    "WHERE p.customer.id = :customerId AND p.parentProject IS NULL " +
-                    "ORDER BY p.name",
+                    "WHERE p.customer.id = :customerId",
                     Project.class)
                 .setParameter("customerId", customerId)
                 .getResultList();
+
+            // Nur Wurzelprojekte zurückgeben — subProjects sind bereits initialisiert
+            return all.stream()
+                    .filter(p -> p.getParentProject() == null)
+                    .sorted(Comparator.comparing(Project::getName))
+                    .toList();
         } finally {
             em.close();
         }
