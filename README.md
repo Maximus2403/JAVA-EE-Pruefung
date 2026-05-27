@@ -183,7 +183,7 @@ Außerdem werden 5 Beispielkunden (KD-0001 bis KD-0005) und ein Projektbaum mit 
 
 Eine detaillierte Dokumentation der Architektur — UML-Klassendiagramm, ER-Diagramm und Schichtenarchitektur — findet sich in:
 
-👉 **[ARCHITECTURE.md](ARCHITECTURE.md)**
+👉 **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**
 
 ### Zugriffskontrolle
 
