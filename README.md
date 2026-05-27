@@ -199,5 +199,3 @@ Eine detaillierte Dokumentation der Architektur — UML-Klassendiagramm, ER-Diag
 Der `AuthFilter` prüft bei jedem Request per CDI-Injection den `@SessionScoped` `AuthController`. Nicht eingeloggte Nutzer werden automatisch zur Login-Seite weitergeleitet.
 
 ---
-
-*IU Internationale Hochschule · DSBPIIJEE01 · SoSe 2026 · Maximilian Wilk*
