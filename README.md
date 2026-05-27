@@ -1,8 +1,6 @@
 # Kundenverwaltungssystem
 
-Ein webbasiertes Kundenverwaltungssystem als Java-EE-Prototyp, entwickelt im Rahmen des Moduls **DSBPIIJEE01 – Programmierung industrieller Informationssysteme mit Java EE** an der IU Internationalen Hochschule.
-
----
+Ein webbasiertes Kundenverwaltungssystem als Java-EE-Prototyp
 
 ## Inhaltsverzeichnis
 
